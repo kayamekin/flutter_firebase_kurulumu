@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "842401490441-ror3e1q0alqj2r71uv5id87ev2acfc5b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flutter_firebase_kurulumu",
+            "certificate_hash": "4300031ac23598238b636bbaf262f4d69a014004"
+          }
+        },
+        {
           "client_id": "842401490441-rhs0jdq4ukh5mn2vj0np6u187p2d8knu.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "842401490441-rhs0jdq4ukh5mn2vj0np6u187p2d8knu.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "842401490441-unp55c28ld1iqm3v0lcj23hr0da0hc2i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.flutterFirebaseKurulumu"
+              }
             }
           ]
         }

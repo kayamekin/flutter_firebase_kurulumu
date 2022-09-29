@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthIslemleri extends StatefulWidget {
   const FirebaseAuthIslemleri({super.key});
@@ -11,8 +12,8 @@ class FirebaseAuthIslemleri extends StatefulWidget {
 class _FirebaseAuthIslemleriState extends State<FirebaseAuthIslemleri> {
   late FirebaseAuth auth;
 
-  final String _email = "baturalpmekin@gmail.com";
-  final String _pass = "user1234";
+  final String _email = "mekin@mekin.com";
+  final String _pass = "password";
 
   @override
   void initState() {
@@ -70,6 +71,39 @@ class _FirebaseAuthIslemleriState extends State<FirebaseAuthIslemleri> {
               },
               child: Text("Hesabımı Sil"),
             ),
+            Divider(
+              indent: MediaQuery.of(context).size.width / 3,
+              endIndent: MediaQuery.of(context).size.width / 3,
+              thickness: 5,
+              color: Colors.black54,
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+              ),
+              onPressed: () {
+                changePass();
+              },
+              child: Text("Şifreyi güncelle"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange.shade400,
+              ),
+              onPressed: () {
+                changeEmail();
+              },
+              child: Text("Email güncelle"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple.shade400,
+              ),
+              onPressed: () {
+                googleLogin();
+              },
+              child: Text("Google ile giriş yap"),
+            ),
           ],
         ),
       ),
@@ -109,6 +143,13 @@ class _FirebaseAuthIslemleriState extends State<FirebaseAuthIslemleri> {
 
   void signOutUser() async {
     try {
+      // google ile çıkış yapma işlemi
+      var _user = await GoogleSignIn().currentUser;
+      if (_user != null) {
+        await GoogleSignIn().signOut();
+        debugPrint("google ile çıkış yapıldı");
+      }
+      // ------------------------------
       await auth.signOut();
       debugPrint("Çıkış Yapıldı");
     } catch (e) {
@@ -127,5 +168,63 @@ class _FirebaseAuthIslemleriState extends State<FirebaseAuthIslemleri> {
       debugPrint(e.toString());
       debugPrint("hesap silinemedi");
     }
+  }
+
+  void changePass() async {
+    try {
+      await auth.currentUser!.updatePassword('password');
+      await auth.signOut();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'require-recent-login') {
+        debugPrint("reauthenticate olunacak");
+        var credential =
+            EmailAuthProvider.credential(email: _email, password: _pass);
+        await auth.currentUser?.reauthenticateWithCredential(credential);
+
+        await auth.currentUser!.updatePassword('password');
+        await auth.signOut();
+        debugPrint("Şifre güncellendi");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  void changeEmail() async {
+    try {
+      await auth.currentUser!.updateEmail('mekin@mekin.com');
+      await auth.signOut();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'require-recent-login') {
+        debugPrint("reauthenticate olunacak");
+        var credential =
+            EmailAuthProvider.credential(email: _email, password: _pass);
+        await auth.currentUser?.reauthenticateWithCredential(credential);
+
+        await auth.currentUser!.updateEmail('mekin@mekin.com');
+        await auth.signOut();
+        debugPrint("Email güncellendi");
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<UserCredential> googleLogin() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 }
